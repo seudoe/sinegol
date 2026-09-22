@@ -20,17 +20,20 @@ export default async function UserDashboardPage({ params }: { params: Promise<{ 
     admin.from("subscriptions").select("*").eq("user_id", profile.id).single(),
     admin.from("golf_scores").select("score").eq("user_id", profile.id).order("played_date", { ascending: false }),
     admin.from("user_charities").select("*, charities(name)").eq("user_id", profile.id).single(),
-    admin.from("winners").select("prize_amount").eq("user_id", profile.id)
+    admin.from("winners").select("prize_amount, match_tier").eq("user_id", profile.id)
   ]);
 
   const ticket = Array.from(new Set((scores || []).map(s => s.score))).slice(0, 5);
   const totalWon = (winnings || []).reduce((sum, w) => sum + Number(w.prize_amount), 0);
+  
+  const highestWin = (winnings || []).reduce((max, w) => Math.max(max, Number(w.prize_amount)), 0);
+  const bestMatch = (winnings || []).reduce((max, w) => Math.max(max, Number(w.match_tier)), 0);
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Dashboard Overview</h1>
       
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Membership Status</CardTitle>
@@ -91,11 +94,31 @@ export default async function UserDashboardPage({ params }: { params: Promise<{ 
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Lifetime Winnings</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Winnings</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-green-600">${totalWon.toFixed(2)}</p>
             <Button size="sm" variant="link" className="px-0 h-auto mt-1" nativeButton={false} render={<Link href={`/user/${username}/winnings`} />}>View Winnings History</Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Highest Win</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-green-600">${highestWin.toFixed(2)}</p>
+            <p className="text-xs text-muted-foreground mt-2">All time maximum prize</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Best Match</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{bestMatch > 0 ? `${bestMatch} Numbers` : "None yet"}</p>
+            <p className="text-xs text-muted-foreground mt-2">Highest tier achieved</p>
           </CardContent>
         </Card>
       </div>

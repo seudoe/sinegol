@@ -50,7 +50,7 @@ export function Sidebar({
   const pathname = usePathname();
 
   return (
-    <aside className="flex w-64 shrink-0 flex-col gap-6 bg-sidebar px-4 py-8 text-sidebar-foreground">
+    <aside className="sticky top-0 flex h-screen w-64 shrink-0 flex-col gap-6 overflow-y-auto bg-sidebar px-4 py-8 text-sidebar-foreground border-r border-border/70">
       <div className="px-3">
         <p className="text-[0.65rem] font-medium tracking-[0.25em] text-sidebar-primary uppercase">
           {eyebrow}
@@ -58,8 +58,13 @@ export function Sidebar({
       </div>
       <nav className="flex flex-col gap-1">
         {items.map((item) => {
-          const isActive =
-            pathname === item.href || pathname?.startsWith(`${item.href}/`);
+          // Dashboard paths are /user/name or /admin/name (3 parts split by /)
+          const isRootPath = item.href.split("/").length === 3;
+          
+          const isActive = isRootPath
+            ? pathname === item.href
+            : pathname === item.href || pathname?.startsWith(`${item.href}/`);
+            
           const Icon = ICONS[item.icon];
 
           return (

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -6,11 +7,26 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 import { SignupForm } from "@/components/domain/signup-form";
+import { dashboardPathFor, getCurrentProfile } from "@/lib/auth/session";
 
-export default function SignupPage() {
+export default async function SignupPage() {
+  const profile = await getCurrentProfile();
+
+  if (profile) {
+    redirect(dashboardPathFor(profile));
+  }
+
   return (
     <div className="mx-auto flex min-h-full max-w-sm flex-1 flex-col justify-center px-6 py-16">
+      <Button variant="ghost" asChild className="mb-4 w-fit pl-0 text-muted-foreground hover:bg-transparent hover:text-foreground">
+        <Link href="/">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Home
+        </Link>
+      </Button>
       <Card className="ring-1 ring-border">
         <CardHeader className="items-center text-center">
           <CardTitle className="text-2xl">Request membership</CardTitle>

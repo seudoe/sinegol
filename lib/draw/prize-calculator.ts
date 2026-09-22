@@ -12,9 +12,10 @@ export const PRIZE_POOL_SHARE: Record<MatchTier, number> = {
  * 3/4-match shares do not roll over (see docs/assumptions.md).
  */
 export function calculatePrizePerWinner(
-  _tier: MatchTier,
-  _prizePool: number,
-  _winnerCount: number
+  tier: MatchTier,
+  prizePool: number,
+  winnerCount: number
 ): number {
-  throw new Error("Not implemented");
+  if (winnerCount === 0) return 0;
+  return (prizePool * PRIZE_POOL_SHARE[tier]) / winnerCount;
 }

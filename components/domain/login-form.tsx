@@ -1,26 +1,38 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput } from "@/lib/validation/auth";
-import { usernameFromEmail } from "@/lib/auth/username";
+import { loginAction } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/domain/password-input";
 
 export function LoginForm() {
   const router = useRouter();
+  const [formError, setFormError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
 
-  function onSubmit(data: LoginInput) {
-    // Sign-in isn't wired to Supabase yet (see docs/assumptions.md) —
-    // preview mode routes straight to the member dashboard.
-    router.push(`/user/${usernameFromEmail(data.email)}`);
+  async function onSubmit(data: LoginInput) {
+    setFormError(null);
+    const res = await loginAction(data);
+
+    if (res.error || !res.profile) {
+      setFormError(res.error || "Unable to sign in.");
+      return;
+    }
+
+    router.push(
+      res.profile.role === "admin" ? `/admin/${res.profile.username}` : `/user/${res.profile.username}`
+    );
+    router.refresh();
   }
 
   return (
@@ -41,9 +53,8 @@ export function LoginForm() {
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="password">Password</Label>
-        <Input
+        <PasswordInput
           id="password"
-          type="password"
           autoComplete="current-password"
           placeholder="••••••••"
           {...register("password")}
@@ -52,6 +63,8 @@ export function LoginForm() {
           <p className="text-xs text-destructive">{errors.password.message}</p>
         )}
       </div>
+
+      {formError && <p className="text-sm text-destructive">{formError}</p>}
 
       <Button type="submit" disabled={isSubmitting} className="mt-2 w-full">
         Sign in

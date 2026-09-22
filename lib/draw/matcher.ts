@@ -5,8 +5,11 @@ import type { MatchTier } from "@/types/draw";
  * returns the matched values plus the resulting tier (null if <3 match).
  */
 export function matchNumbers(
-  _userNumbers: number[],
-  _drawNumbers: number[]
+  userNumbers: number[],
+  drawNumbers: number[]
 ): { matched: number[]; tier: MatchTier | null } {
-  throw new Error("Not implemented");
+  const matched = userNumbers.filter((n) => drawNumbers.includes(n));
+  const count = matched.length;
+  const tier = count >= 3 && count <= 5 ? (count as MatchTier) : null;
+  return { matched, tier };
 }

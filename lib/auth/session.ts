@@ -1,6 +1,8 @@
 import "server-only";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 import type { Profile, UserRole } from "@/types/user";
 
 const SUPABASE_CONFIGURED = Boolean(
@@ -23,6 +25,51 @@ function demoProfile(username: string, role: UserRole): Profile {
 }
 
 /**
+ * Resolves the signed-in user's profile from the Supabase session, or
+ * `null` if there isn't one. Never redirects — safe to call from anywhere
+ * (e.g. the navbar) to render session-aware UI. Returns `null` whenever
+ * Supabase isn't configured, since there's no real session to check.
+ */
+export async function getCurrentProfile(): Promise<Profile | null> {
+  if (!SUPABASE_CONFIGURED) {
+    return null;
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return null;
+  }
+
+  const admin = createAdminClient();
+  const { data: profile, error } = await admin
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single<Profile>();
+
+  if (error) {
+    logger.error("auth:getCurrentProfile", "profile lookup failed", {
+      userId: user.id,
+      error: error.message,
+    });
+    return null;
+  }
+
+  if (!profile) {
+    logger.warn("auth:getCurrentProfile", "authenticated but no profile row", {
+      userId: user.id,
+    });
+    return null;
+  }
+
+  return profile;
+}
+
+/**
  * Resolves the authenticated user's profile from the Supabase session —
  * never from the `[username]` URL segment. Redirects to /login if absent.
  *
@@ -33,25 +80,18 @@ function demoProfile(username: string, role: UserRole): Profile {
  */
 export async function requireUser(fallbackUsername: string): Promise<Profile> {
   if (!SUPABASE_CONFIGURED) {
+    logger.debug("auth:requireUser", "demo mode (Supabase unconfigured)", {
+      fallbackUsername,
+    });
     return demoProfile(fallbackUsername, "user");
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single<Profile>();
+  const profile = await getCurrentProfile();
 
   if (!profile) {
+    logger.info("auth:requireUser", "no session, redirecting to /login", {
+      fallbackUsername,
+    });
     redirect("/login");
   }
 
@@ -63,14 +103,30 @@ export async function requireUser(fallbackUsername: string): Promise<Profile> {
  */
 export async function requireAdmin(fallbackUsername: string): Promise<Profile> {
   if (!SUPABASE_CONFIGURED) {
+    logger.debug("auth:requireAdmin", "demo mode (Supabase unconfigured)", {
+      fallbackUsername,
+    });
     return demoProfile(fallbackUsername, "admin");
   }
 
   const profile = await requireUser(fallbackUsername);
 
   if (profile.role !== "admin") {
+    logger.warn("auth:requireAdmin", "non-admin denied, redirecting to /", {
+      userId: profile.id,
+      role: profile.role,
+    });
     redirect("/");
   }
 
   return profile;
+}
+
+/**
+ * Where a profile's dashboard lives, based on role.
+ */
+export function dashboardPathFor(profile: Profile): string {
+  return profile.role === "admin"
+    ? `/admin/${profile.username}`
+    : `/user/${profile.username}`;
 }

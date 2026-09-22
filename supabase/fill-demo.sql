@@ -1,26 +1,14 @@
 -- Sinegol — demo/dev seed data
--- Run once after supabase/create-all.sql. Inserts are idempotent
--- (ON CONFLICT / NOT EXISTS guards), so re-running is safe.
---
--- NOTE: this also inserts into the Supabase-managed `auth.users` table so
--- the demo profiles can actually sign in (password: "Password" for all
--- three). Local/dev projects only — never run this against production.
-
-create extension if not exists "pgcrypto";
+-- Run `node supabase/seed-demo-users.mjs` FIRST — it provisions the three
+-- demo accounts in Supabase Auth via the Admin API. Do NOT hand-insert rows
+-- into `auth.users` here: it skips the matching `auth.identities` row and
+-- breaks sign-in with "Database error querying schema" (see
+-- docs/assumptions.md). Once that script has run, this file is idempotent
+-- (ON CONFLICT / NOT EXISTS guards), so re-running it is safe.
 
 -- ---------------------------------------------------------------------------
--- Auth users + profiles
+-- Profiles (matching the auth users created by seed-demo-users.mjs)
 -- ---------------------------------------------------------------------------
-
-insert into auth.users (
-  instance_id, id, aud, role, email, encrypted_password,
-  email_confirmed_at, created_at, updated_at,
-  raw_app_meta_data, raw_user_meta_data, is_sso_user
-) values
-  ('00000000-0000-0000-0000-000000000000', '11111111-1111-1111-1111-111111111111', 'authenticated', 'authenticated', 'alexandra@sinegol.com', crypt('Password', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', false),
-  ('00000000-0000-0000-0000-000000000000', '22222222-2222-2222-2222-222222222222', 'authenticated', 'authenticated', 'james@sinegol.com', crypt('Password', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', false),
-  ('00000000-0000-0000-0000-000000000000', '33333333-3333-3333-3333-333333333333', 'authenticated', 'authenticated', 'olivia@sinegol.com', crypt('Password', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', false)
-on conflict (id) do nothing;
 
 insert into profiles (id, username, name, email, role) values
   ('11111111-1111-1111-1111-111111111111', 'alexandra', 'Alexandra Hartley', 'alexandra@sinegol.com', 'user'),

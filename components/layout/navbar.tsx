@@ -1,12 +1,16 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { dashboardPathFor, getCurrentProfile } from "@/lib/auth/session";
+import { signOut } from "@/lib/auth/actions";
 
 const LINKS = [
   { href: "/charities", label: "Charities" },
   { href: "/how-it-works", label: "How it works" },
 ];
 
-export function Navbar() {
+export async function Navbar() {
+  const profile = await getCurrentProfile();
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
@@ -31,19 +35,37 @@ export function Navbar() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
-          <Button
-            render={<Link href="/login" />}
-            nativeButton={false}
-            variant="ghost"
-            className="hidden sm:inline-flex"
-          >
-            Log in
-          </Button>
-          <Button render={<Link href="/signup" />} nativeButton={false}>
-            Become a member
-          </Button>
-        </div>
+        {profile ? (
+          <div className="flex items-center gap-3">
+            <Button
+              render={<Link href={dashboardPathFor(profile)} />}
+              nativeButton={false}
+              variant="ghost"
+              className="hidden sm:inline-flex"
+            >
+              {profile.name}
+            </Button>
+            <form action={signOut}>
+              <Button type="submit" variant="outline">
+                Sign out
+              </Button>
+            </form>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <Button
+              render={<Link href="/login" />}
+              nativeButton={false}
+              variant="ghost"
+              className="hidden sm:inline-flex"
+            >
+              Log in
+            </Button>
+            <Button render={<Link href="/signup" />} nativeButton={false}>
+              Become a member
+            </Button>
+          </div>
+        )}
       </div>
     </header>
   );

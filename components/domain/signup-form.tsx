@@ -35,7 +35,7 @@ export function SignupForm() {
       return;
     }
 
-    router.push(`/user/${res.username}`);
+    router.push(`/subscribe`);
     router.refresh();
   }
 

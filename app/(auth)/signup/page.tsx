@@ -21,11 +21,9 @@ export default async function SignupPage() {
 
   return (
     <div className="mx-auto flex min-h-full max-w-sm flex-1 flex-col justify-center px-6 py-16">
-      <Button variant="ghost" asChild className="mb-4 w-fit pl-0 text-muted-foreground hover:bg-transparent hover:text-foreground">
-        <Link href="/">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Home
-        </Link>
+      <Button variant="ghost" nativeButton={false} render={<Link href="/" />} className="mb-4 w-fit pl-0 text-muted-foreground hover:bg-transparent hover:text-foreground">
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Home
       </Button>
       <Card className="ring-1 ring-border">
         <CardHeader className="items-center text-center">

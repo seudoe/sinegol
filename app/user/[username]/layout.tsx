@@ -21,6 +21,7 @@ export default async function UserLayout({
           eyebrow="Member Portal"
           items={[
             { label: "Dashboard", href: base, icon: "dashboard" },
+            { label: "Plan", href: `${base}/plan`, icon: "plan" },
             { label: "Scores", href: `${base}/scores`, icon: "scores" },
             { label: "Charity", href: `${base}/charity`, icon: "charity" },
             { label: "Draws", href: `${base}/draws`, icon: "draws" },

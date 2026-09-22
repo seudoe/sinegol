@@ -11,6 +11,7 @@ import {
   UserRound,
   Users,
   Wallet,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +25,7 @@ const ICONS = {
   users: Users,
   winners: Trophy,
   analytics: BarChart3,
+  plan: CreditCard,
 } as const;
 
 export type SidebarIcon = keyof typeof ICONS;

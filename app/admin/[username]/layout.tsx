@@ -22,6 +22,8 @@ export default async function AdminLayout({
           items={[
             { label: "Dashboard", href: base, icon: "dashboard" },
             { label: "Users", href: `${base}/users`, icon: "users" },
+            { label: "Plans", href: `${base}/plans`, icon: "plan" },
+            { label: "Payments", href: `${base}/payments`, icon: "winnings" },
             { label: "Draws", href: `${base}/draws`, icon: "draws" },
             { label: "Charities", href: `${base}/charities`, icon: "charity" },
             { label: "Winners", href: `${base}/winners`, icon: "winners" },

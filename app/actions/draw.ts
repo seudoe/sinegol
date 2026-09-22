@@ -29,7 +29,6 @@ export async function simulateDraw(method: "random" | "algorithmic", prizePool: 
   if (method === "random") {
     numbers = drawRandomNumbers();
   } else {
-    // @ts-expect-error
     numbers = drawAlgorithmicNumbers(allScores || []);
   }
   

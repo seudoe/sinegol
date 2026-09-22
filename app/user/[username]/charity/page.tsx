@@ -8,7 +8,7 @@ export default async function UserCharityPage({ params }: { params: Promise<{ us
   const admin = createAdminClient();
 
   const [{ data: charities }, { data: currentSelection }] = await Promise.all([
-    admin.from("charities").select("id, name, description"),
+    admin.from("charities").select("id, name, description, image_url"),
     admin.from("user_charities").select("charity_id, contribution_percentage").eq("user_id", profile.id).single()
   ]);
 

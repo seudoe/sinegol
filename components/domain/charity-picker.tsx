@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2 } from "lucide-react";
 import { CharityInfoDialog } from "@/components/domain/charity-info-dialog";
 
-type Charity = { id: string; name: string; description: string };
+type Charity = { id: string; name: string; description: string; image_url?: string | null };
 
 export function CharityPicker({
   charities,
@@ -58,11 +58,20 @@ export function CharityPicker({
             return (
               <div
                 key={charity.id}
-                className={`relative border p-4 rounded-lg cursor-pointer transition-colors flex flex-col ${isSelectedToSave ? 'border-primary ring-1 ring-primary bg-primary/5' : 'hover:border-primary/50'}`}
+                className={`relative border rounded-lg cursor-pointer transition-colors flex flex-col overflow-hidden ${isSelectedToSave ? 'border-primary ring-1 ring-primary bg-primary/5' : 'hover:border-primary/50'}`}
                 onClick={() => setSelectedId(charity.id)}
               >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-medium pr-6">{charity.name}</h3>
+                {charity.image_url ? (
+                  <div className="w-full h-32 bg-muted relative">
+                    <img src={charity.image_url} alt={charity.name} className="object-cover w-full h-full" />
+                  </div>
+                ) : (
+                  <div className="w-full h-2 bg-muted" />
+                )}
+                
+                <div className="p-4 flex-1 flex flex-col">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-medium pr-6">{charity.name}</h3>
                   {isSelectedToSave && (
                     <CheckCircle2 className="h-5 w-5 text-primary absolute top-4 right-4" />
                   )}
@@ -77,6 +86,7 @@ export function CharityPicker({
                       Current ({initialSelection.percentage}%)
                     </Badge>
                   )}
+                </div>
                 </div>
               </div>
             );

@@ -99,3 +99,58 @@ export async function signupAction(data: SignupInput) {
     return { error: "An unexpected error occurred." };
   }
 }
+
+export async function signupAdminAction(data: SignupInput) {
+  try {
+    const parsed = signupSchema.parse(data);
+    const supabase = await createClient();
+    const username = usernameFromEmail(parsed.email);
+    
+    const admin = createAdminClient();
+    
+    const { data: adminAuth, error: createError } = await admin.auth.admin.createUser({
+      email: parsed.email,
+      password: parsed.password,
+      email_confirm: true,
+      user_metadata: { name: parsed.name }
+    });
+    
+    if (createError) {
+      const msg = friendlyAuthError(createError);
+      logger.error("action:auth", "Admin Signup failed", { email: parsed.email, error: msg });
+      return { error: msg };
+    }
+    
+    if (!adminAuth.user) {
+      return { error: "Something went wrong creating your account." };
+    }
+    
+    const user = adminAuth.user;
+    
+    const { error: profileError } = await admin.from("profiles").insert({
+      id: user.id,
+      username,
+      name: parsed.name,
+      email: parsed.email,
+      role: "admin",
+      admin_status: "pending"
+    });
+    
+    if (profileError) {
+      logger.error("action:auth", "Profile creation failed", { userId: user.id, error: profileError.message });
+      return { error: profileError.message };
+    }
+    
+    // Auto-login to establish a session since admin creation bypasses session setting
+    const { data: auth } = await supabase.auth.signInWithPassword({
+      email: parsed.email,
+      password: parsed.password,
+    });
+    
+    logger.info("action:auth", "Admin signed up successfully (pending)", { username });
+    return { success: true, hasSession: !!auth?.session, username };
+  } catch (err) {
+    const error = err as Error;
+    return { error: "An unexpected error occurred." };
+  }
+}

@@ -119,6 +119,14 @@ export async function requireAdmin(fallbackUsername: string): Promise<Profile> {
     redirect("/");
   }
 
+  // Allow 'demo' profile to pass if Supabase is unconfigured
+  if (profile.id !== "demo" && profile.admin_status === "pending") {
+    logger.warn("auth:requireAdmin", "pending admin denied, redirecting to /", {
+      userId: profile.id,
+    });
+    redirect("/?pending_admin=true");
+  }
+
   return profile;
 }
 

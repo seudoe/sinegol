@@ -21,6 +21,7 @@ export default async function AdminLayout({
           eyebrow="Admin Console"
           items={[
             { label: "Dashboard", href: base, icon: "dashboard" },
+            { label: "Admins Hierarchy", href: `${base}/admin-control`, icon: "profile" },
             { label: "Users", href: `${base}/users`, icon: "users" },
             { label: "Plans", href: `${base}/plans`, icon: "plan" },
             { label: "Payments", href: `${base}/payments`, icon: "winnings" },

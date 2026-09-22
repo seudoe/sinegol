@@ -9,26 +9,29 @@ export default async function UserLayout({
   children: React.ReactNode;
   params: Promise<{ username: string }>;
 }) {
-  const profile = await requireUser();
   const { username } = await params;
+  const profile = await requireUser(username);
   const base = `/user/${username}`;
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <Navbar />
-      <div className="mx-auto flex w-full max-w-6xl flex-1">
+      <div className="mx-auto flex w-full max-w-6xl flex-1 border-x border-border/70">
         <Sidebar
+          eyebrow="Member Portal"
           items={[
-            { label: "Dashboard", href: base },
-            { label: "Scores", href: `${base}/scores` },
-            { label: "Charity", href: `${base}/charity` },
-            { label: "Draws", href: `${base}/draws` },
-            { label: "Winnings", href: `${base}/winnings` },
-            { label: "Profile", href: `${base}/profile` },
+            { label: "Dashboard", href: base, icon: "dashboard" },
+            { label: "Scores", href: `${base}/scores`, icon: "scores" },
+            { label: "Charity", href: `${base}/charity`, icon: "charity" },
+            { label: "Draws", href: `${base}/draws`, icon: "draws" },
+            { label: "Winnings", href: `${base}/winnings`, icon: "winnings" },
+            { label: "Profile", href: `${base}/profile`, icon: "profile" },
           ]}
         />
-        <main className="flex-1 px-8 py-8">
-          <p className="sr-only">Signed in as {profile.username}</p>
+        <main className="flex-1 px-10 py-10">
+          <p className="mb-8 text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
+            Welcome back, {profile.name}
+          </p>
           {children}
         </main>
       </div>

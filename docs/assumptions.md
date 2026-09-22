@@ -32,6 +32,23 @@ Node.js runtime). Session refresh + route protection therefore live in
 instead of the `middleware.ts` named in the original folder-structure sketch.
 Behavior is unchanged; only the file/export name differs.
 
+## Preview-mode auth bypass (temporary, until Supabase is configured)
+
+`lib/auth/session.ts`'s `requireUser`/`requireAdmin` normally resolve the
+profile from the Supabase session only, per §12 ("never trust `[username]`
+in the URL for authorization"). Until `NEXT_PUBLIC_SUPABASE_URL` and
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` are set, there is no real backend to
+authenticate against, so these functions fall back to a demo profile built
+from the route's `[username]` segment instead of redirecting to `/login`.
+This lets the dashboard UI (Stage 3-4) be reviewed end-to-end before Stage 2
+wires up real Supabase Auth. `/login` and `/signup` (`components/domain/
+login-form.tsx`, `signup-form.tsx`) do not call Supabase yet either — they
+just redirect to `/user/<slug-of-email>` client-side.
+
+This bypass disappears automatically the moment Supabase credentials are
+set: `requireUser`/`requireAdmin` then take the real session-only path and
+`[username]` is no longer trusted for authorization, matching §12.
+
 ## shadcn/ui CLI
 
 The installed `shadcn` CLI version uses a `--base` (component library:

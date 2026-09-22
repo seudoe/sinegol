@@ -9,26 +9,29 @@ export default async function AdminLayout({
   children: React.ReactNode;
   params: Promise<{ username: string }>;
 }) {
-  const profile = await requireAdmin();
   const { username } = await params;
+  const profile = await requireAdmin(username);
   const base = `/admin/${username}`;
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <Navbar />
-      <div className="mx-auto flex w-full max-w-6xl flex-1">
+      <div className="mx-auto flex w-full max-w-6xl flex-1 border-x border-border/70">
         <Sidebar
+          eyebrow="Admin Console"
           items={[
-            { label: "Dashboard", href: base },
-            { label: "Users", href: `${base}/users` },
-            { label: "Draws", href: `${base}/draws` },
-            { label: "Charities", href: `${base}/charities` },
-            { label: "Winners", href: `${base}/winners` },
-            { label: "Analytics", href: `${base}/analytics` },
+            { label: "Dashboard", href: base, icon: "dashboard" },
+            { label: "Users", href: `${base}/users`, icon: "users" },
+            { label: "Draws", href: `${base}/draws`, icon: "draws" },
+            { label: "Charities", href: `${base}/charities`, icon: "charity" },
+            { label: "Winners", href: `${base}/winners`, icon: "winners" },
+            { label: "Analytics", href: `${base}/analytics`, icon: "analytics" },
           ]}
         />
-        <main className="flex-1 px-8 py-8">
-          <p className="sr-only">Signed in as {profile.username}</p>
+        <main className="flex-1 px-10 py-10">
+          <p className="mb-8 text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
+            Signed in as {profile.name} &middot; Administrator
+          </p>
           {children}
         </main>
       </div>

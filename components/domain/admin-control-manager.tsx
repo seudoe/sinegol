@@ -5,6 +5,7 @@ import { approveAdmin, deleteAdmin } from "@/app/actions/admin-control";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { AdminHierarchyGraph } from "@/components/domain/admin-hierarchy-graph";
 
 type AdminProfile = {
   id: string;
@@ -20,7 +21,8 @@ export function AdminControlManager({ admins, currentUserId, currentUserDepth, u
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   const pendingAdmins = admins.filter(a => a.admin_status === "pending");
-  const approvedAdmins = admins.filter(a => a.admin_status === "approved" && a.id !== currentUserId);
+  const allApprovedAdmins = admins.filter(a => a.admin_status === "approved");
+  const approvedAdmins = allApprovedAdmins.filter(a => a.id !== currentUserId);
 
   async function handleApprove(id: string) {
     setLoadingId(id);
@@ -104,6 +106,12 @@ export function AdminControlManager({ admins, currentUserId, currentUserDepth, u
             );
           })}
         </div>
+      </div>
+
+      <div className="pt-8 border-t">
+        <h2 className="text-xl font-semibold tracking-tight mb-2">Power Matrix Visualization</h2>
+        <p className="text-sm text-muted-foreground mb-4">A visual map of the administration tree. Root admins are at the top.</p>
+        <AdminHierarchyGraph admins={allApprovedAdmins} currentUserId={currentUserId} />
       </div>
     </div>
   );

@@ -41,9 +41,13 @@ export function AdminSignupForm() {
 
   if (confirmEmailSent) {
     return (
-      <p className="text-center text-sm text-muted-foreground">
-        Check your email to confirm your account.
-      </p>
+      <div className="text-center bg-muted/50 p-6 rounded-lg border">
+        <h3 className="text-lg font-bold text-foreground mb-2">Application Submitted!</h3>
+        <p className="text-sm text-muted-foreground">
+          Your admin account has been created and is currently pending approval. 
+          An existing administrator must approve your account before you can log in.
+        </p>
+      </div>
     );
   }
 

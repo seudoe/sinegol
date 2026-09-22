@@ -26,13 +26,18 @@ export async function loginAction(data: LoginInput) {
     const admin = createAdminClient();
     const { data: profile } = await admin
       .from("profiles")
-      .select("username, role")
+      .select("username, role, admin_status")
       .eq("id", auth.user.id)
-      .single<{ username: string; role: "user" | "admin" }>();
+      .single<{ username: string; role: "user" | "admin"; admin_status?: "pending" | "approved" }>();
       
     if (!profile) {
       logger.error("action:auth", "Profile not found after signin", { userId: auth.user.id });
       return { error: "Signed in, but no profile was found for this account." };
+    }
+
+    if (profile.role === "admin" && profile.admin_status === "pending") {
+      await supabase.auth.signOut();
+      return { error: "Your admin account is currently pending approval by another administrator." };
     }
     
     logger.info("action:auth", "User logged in successfully", { username: profile.username });
@@ -141,14 +146,8 @@ export async function signupAdminAction(data: SignupInput) {
       return { error: profileError.message };
     }
     
-    // Auto-login to establish a session since admin creation bypasses session setting
-    const { data: auth } = await supabase.auth.signInWithPassword({
-      email: parsed.email,
-      password: parsed.password,
-    });
-    
     logger.info("action:auth", "Admin signed up successfully (pending)", { username });
-    return { success: true, hasSession: !!auth?.session, username };
+    return { success: true, hasSession: false, username };
   } catch (err) {
     const error = err as Error;
     return { error: "An unexpected error occurred." };

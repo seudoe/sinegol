@@ -1,19 +1,19 @@
 "use server";
 
 import { requireUser } from "@/lib/auth/session";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { logger } from "@/lib/logger";
 
 export async function createDummySubscription(plan: "monthly" | "yearly", username: string) {
   const profile = await requireUser(username);
-  const supabase = await createClient();
+  const admin = createAdminClient();
   
   const amount = plan === "monthly" ? 10 : 100;
   const renewal = new Date();
   renewal.setMonth(renewal.getMonth() + (plan === "monthly" ? 1 : 12));
   
-  const { error } = await supabase.from("subscriptions").insert({
+  const { error } = await admin.from("subscriptions").insert({
     user_id: profile.id,
     plan,
     status: "active",

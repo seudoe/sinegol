@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { setUserCharity } from "@/app/actions/charity";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle2 } from "lucide-react";
+import { CharityInfoDialog } from "@/components/domain/charity-info-dialog";
 
 type Charity = { id: string; name: string; description: string };
 
@@ -28,6 +31,10 @@ export function CharityPicker({
       setError("Please select a charity.");
       return;
     }
+    if (percentage < 10) {
+      setError("Minimum contribution is 10%.");
+      return;
+    }
     setLoading(true);
     setError(null);
     
@@ -44,16 +51,36 @@ export function CharityPicker({
         {charities.length === 0 ? (
           <p className="text-muted-foreground text-sm col-span-2">No charities available yet.</p>
         ) : (
-          charities.map(charity => (
-            <div
-              key={charity.id}
-              className={`border p-4 rounded-lg cursor-pointer transition-colors ${selectedId === charity.id ? 'border-primary bg-primary/5' : 'hover:border-primary/50'}`}
-              onClick={() => setSelectedId(charity.id)}
-            >
-              <h3 className="font-medium mb-1">{charity.name}</h3>
-              <p className="text-sm text-muted-foreground line-clamp-2">{charity.description}</p>
-            </div>
-          ))
+          charities.map(charity => {
+            const isCurrentSaved = initialSelection?.charity_id === charity.id;
+            const isSelectedToSave = selectedId === charity.id;
+            
+            return (
+              <div
+                key={charity.id}
+                className={`relative border p-4 rounded-lg cursor-pointer transition-colors flex flex-col ${isSelectedToSave ? 'border-primary ring-1 ring-primary bg-primary/5' : 'hover:border-primary/50'}`}
+                onClick={() => setSelectedId(charity.id)}
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-medium pr-6">{charity.name}</h3>
+                  {isSelectedToSave && (
+                    <CheckCircle2 className="h-5 w-5 text-primary absolute top-4 right-4" />
+                  )}
+                </div>
+                
+                <p className="text-sm text-muted-foreground line-clamp-2 flex-1 mb-2">{charity.description}</p>
+                
+                <div className="mt-2 flex items-center justify-between" onClick={e => e.stopPropagation()}>
+                  <CharityInfoDialog charity={charity} />
+                  {isCurrentSaved && (
+                    <Badge variant="secondary" className="text-xs">
+                      Current ({initialSelection.percentage}%)
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            );
+          })
         )}
       </div>
 
@@ -62,12 +89,12 @@ export function CharityPicker({
         <Input
           id="percentage"
           type="number"
-          min="1"
+          min="10"
           max="100"
           value={percentage}
           onChange={e => setPercentage(Number(e.target.value))}
         />
-        <p className="text-xs text-muted-foreground">How much of your potential winnings goes to charity?</p>
+        <p className="text-xs text-muted-foreground">Minimum 10%. How much of your potential winnings goes to charity?</p>
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}

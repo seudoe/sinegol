@@ -72,15 +72,15 @@ export function AdminHierarchyGraph({ admins, currentUserId }: { admins: AdminNo
   // Custom node rendering for better styling
   const renderCustomNodeElement = ({ nodeDatum }: { nodeDatum: TreeNode | any }) => (
     <g>
-      <rect width="180" height="70" x="-90" y="-35" fill="hsl(var(--card))" stroke="hsl(var(--primary))" strokeWidth="2" rx="10" />
-      <text fill="hsl(var(--foreground))" strokeWidth="0" x="0" y="-5" textAnchor="middle" fontWeight="bold" fontSize="14">
+      <rect width="180" height="70" x="-90" y="-35" className="fill-card stroke-primary" strokeWidth="2" rx="10" />
+      <text className="fill-foreground font-bold text-sm" strokeWidth="0" x="0" y="-5" textAnchor="middle">
         {nodeDatum.name}
       </text>
-      <text fill="hsl(var(--muted-foreground))" strokeWidth="0" x="0" y="15" textAnchor="middle" fontSize="12">
+      <text className="fill-muted-foreground text-xs" strokeWidth="0" x="0" y="15" textAnchor="middle">
         {nodeDatum.attributes?.username}
       </text>
       {nodeDatum.attributes?.depth >= 0 && (
-        <text fill="hsl(var(--primary))" strokeWidth="0" x="0" y="30" textAnchor="middle" fontSize="10">
+        <text className="fill-primary text-[10px]" strokeWidth="0" x="0" y="30" textAnchor="middle">
           Depth: {nodeDatum.attributes?.depth}
         </text>
       )}
